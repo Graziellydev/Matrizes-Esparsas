@@ -15,8 +15,7 @@ struct Node {
         this->linha = linha;
         this->coluna = coluna;
         this->value = value;
-    }
-    
+    }  
 };
 
 #endif

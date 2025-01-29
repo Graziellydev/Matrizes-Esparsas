@@ -4,7 +4,7 @@
 #include "SparseMatrix.h"
 using namespace std;
 
-//void readSparseMatrix(SparseMatrix& m, String ?); //Temos que colocar o nome do arquivo como parâmetro
+void readSparseMatrix(SparseMatrix& m, String ?); //Temos que colocar o nome do arquivo como parâmetro
 
 SparseMatrix sum(SparseMatrix& A, SparseMatrix& B);
 
