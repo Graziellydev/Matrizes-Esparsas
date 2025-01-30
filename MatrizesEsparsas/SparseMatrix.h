@@ -21,7 +21,7 @@ public:
 // Não é pro Atílio, não se preocupe ;)
 
     // Construtor que recebe como parâmetro o numero de linhas e colunas
-    void SparseMatrix(int m, int n) {
+    SparseMatrix(int m, int n) {
         if (m <= 0 || n <= 0) {
             throw invalid_argument("As medidas precisam ser positivas");
             return;
@@ -71,7 +71,7 @@ public:
     }
 
     // Esse aqui pega os valores que estão na matriz
-    double get(int i, int j) {
+    /*double get(int i, int j) {
         Node* aux = new Node(0, 0, 0);
         aux = m_headLinha;
         int indice = 1;
@@ -82,7 +82,7 @@ public:
         }
 
 
-    }
+    
 
 
     // Esse só imprime a matriz pegando os valores pelo get
@@ -93,7 +93,7 @@ public:
             }
             cout << endl;
         }
-    }
+    }*/
 
     // Esses métodos são opcionais
     // Criei apenas caso a gente precise (consequências do Java)

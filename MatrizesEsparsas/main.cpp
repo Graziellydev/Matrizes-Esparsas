@@ -4,8 +4,8 @@
 #include "SparseMatrix.h"
 using namespace std;
 
-void readSparseMatrix(SparseMatrix& m, string teste) {
-    ifstream arquivo(teste);
+void readSparseMatrix(SparseMatrix& m, const string& filename) {
+    ifstream arquivo(filename);
     if (!arquivo) {
         cerr << "Erro ao abrir o arquivo!\n";
         return;
@@ -28,6 +28,8 @@ SparseMatrix sum(SparseMatrix& A, SparseMatrix& B);
 
 SparseMatrix multiply(SparseMatrix& A, SparseMatrix& B);
 
-int main();
-
+int main(){
+    SparseMatrix A(4,4);
+    readSparseMatrix(A, "teste.txt");
+}
 
