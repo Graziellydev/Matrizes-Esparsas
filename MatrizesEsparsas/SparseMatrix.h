@@ -54,10 +54,13 @@ public:
     }
 
     // Destrutor
-    ~SparseMatrix();
+    ~SparseMatrix(){
+        clear();
+        cout << "Matriz esparsas destruída" << endl;
+    }
 
 
-    // Esse aqui insere um valor na matriz (ou escreve por cima)
+    // Depois vou fazer uma explicação do método aqui!
     void insert(int i, int j, double value) {
         if (i > linhas || i < 1 || j > colunas || j < 1) {
             throw out_of_range("Índices inválidos");
@@ -67,33 +70,115 @@ public:
             return;
         }
 
-        // Continuo depois...
+        Node* auxLinha = m_headLinha;
+        Node* auxColuna = m_headColuna;
+        
+        while(auxLinha->abaixo != m_headLinha && auxLinha->abaixo->linha < i) {
+            auxLinha = auxLinha->abaixo;
+        }
+        
+        while(auxColuna->direita != m_headColuna && auxColuna->direita->coluna < j) {
+            auxColuna = auxColuna->direita;
+        }
+
+        if(auxLinha->abaixo != m_headLinha && auxLinha->abaixo->linha == i) {
+            auxLinha->abaixo->value = value;
+        } else {
+            Node* nodeL = new Node(i, j, value);
+            nodeL->abaixo = auxLinha->abaixo;
+            auxLinha->abaixo = nodeC;
+        }
+        
+        if(auxColuna->direita != m_headColuna && auxColuna->direita->coluna == j) {
+            auxColuna->abaixo->value = value;
+        } else {
+            Node* nodeC = new Node(i, j, value);
+            nodeC->direita = auxColuna->direita;
+            auxColuna->direita = nodeC;
+        }
+        
     }
 
-    // Esse aqui pega os valores que estão na matriz
-    /*double get(int i, int j) {
-        Node* aux = new Node(0, 0, 0);
-        aux = m_headLinha;
-        int indice = 1;
-        for(int i = 1; i <= linhas; i++) {
-            for(int j = 1; j <= colunas; j++){
-
-            }
+    // Acessa valores que estão na matriz reconhecendo casos em que o valor é 0
+    double get(int i, int j) {
+        if(i < 1 || i > linhas || j < 1 || j > colunas){
+            throw out_of_range("Índices inválidos");
+        }
+        
+        Node* linhaAtual = m_headLinha;
+        // Encontro a linha que foi passada como parâmetro
+        while(linhaAtual -> abaixo != m_headLinha && linhaAtual -> abaixo -> linha <= i){
+            linhaAtual = linhaAtual -> abaixo;
         }
 
+        Node* aux = linhaAtual -> direita;
+        while(aux != linhaAtual && aux -> coluna <= j) {
+            if(aux -> coluna == j) {
+                return aux -> value;
+            }
+            aux = aux -> direita;
+        }
 
+        return 0.0;
+
+    }
     
+    // Esse imprime a matriz pegando os valores pelo get reconhecendo casos em que existe 0
+void print() {
+    Node* linhaAtual = m_headLinha->abaixo; // Começa pela primeira linha válida
 
-
-    // Esse só imprime a matriz pegando os valores pelo get
-    void print() {
-        for (int i = 1; i <= linhas; i++) {
+    for (int i = 1; i <= linhas; i++) {
+        if (linhaAtual != m_headLinha && linhaAtual->linha == i) {
+            Node* atual = linhaAtual->direita; // Primeiro elemento da linha
             for (int j = 1; j <= colunas; j++) {
-                cout << get(i, j) << " ";
+                if (atual != linhaAtual && atual->coluna == j) {
+                    cout << atual->value << " ";
+                    atual = atual->direita; // Avança para o próximo nó na linha
+                } else {
+                    cout << " 0 ";
+                }
             }
-            cout << endl;
+            linhaAtual = linhaAtual->abaixo; // Passa para a próxima linha
+        } else {
+            // Linha não tem elementos armazenados, imprime apenas zeros
+            for (int j = 1; j <= colunas; j++) {
+                cout << " 0 ";
+            }
         }
-    }*/
+        cout << endl;
+    }
+}
+
+    void clear() {// apaga os elementos da lista
+	    Node* linhaAtual = m_headLinha -> abaixo;
+        
+        while (linhaAtual != m_headLinha) {
+		        Node *atual = linhaAtual -> direita;
+                
+                while(atual != linhaAtual){
+                    Node* aux = atual;
+                    atual = atual -> direita;
+                    delete aux;
+                }
+                Node* auxLinha = linhaAtual;
+                linhaAtual = linhaAtual -> abaixo;
+                delete auxLinha;
+            }
+
+            Node* colunaAtual = m_headColuna -> direita;
+            while(colunaAtual != m_headColuna){
+                Node* aux = colunaAtual;
+                colunaAtual = colunaAtual -> direita;
+                delete aux;
+            }
+            
+            delete m_headLinha;
+            delete m_headColuna;
+	    // Atualiza os ínidices para 0
+	    linhas = 0;
+        colunas = 0;
+    }
+
 
     // Esses métodos são opcionais
     // Criei apenas caso a gente precise (consequências do Java)
