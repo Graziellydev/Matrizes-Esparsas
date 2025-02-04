@@ -24,7 +24,6 @@ public:
     SparseMatrix(int m, int n) {
         if (m <= 0 || n <= 0) {
             throw invalid_argument("As medidas precisam ser positivas");
-            return;
         }
             
         linhas = m;
@@ -51,16 +50,25 @@ public:
             auxColuna -> abaixo = auxColuna;
         }
         auxColuna->direita = m_headColuna;
+
+        cout << "Matriz criada" << endl;
     }
 
     // Destrutor
-    ~SparseMatrix(){
-        clear();
-        cout << "Matriz esparsas destruída" << endl;
-    }
+    ~SparseMatrix() {
+        clear();  // Chama a função clear para liberar a memória corretamente
+        cout << "Matriz esparsa destruída" << endl;
+}
 
 
-    // Depois vou fazer uma explicação do método aqui!
+    /* Primeiro ele faz a verificação se os índices são válidos, se forem o código continua.
+    Depois disso ele verifica se o value é 0, se não for, o código continua.
+    Depois, ele cria dois nós auxiliares para a linha e coluna, começando pelo nó sentinela.
+    Depois, ele possui dois loops que percorrem a lista de linhas e colunas para chegar na posição desejada.
+    Depois, ele faz uma verificação para saber se o elemento no índice (i,j) já existe.
+    Caso exista, ele só atualiza o valor.
+    Caso não exista, ele cria um novo nó e insere nas estruturas de linhas e colunas
+    */
     void insert(int i, int j, double value) {
         if (i > linhas || i < 1 || j > colunas || j < 1) {
             throw out_of_range("Índices inválidos");
@@ -71,113 +79,122 @@ public:
         }
 
         Node* auxLinha = m_headLinha;
-        Node* auxColuna = m_headColuna;
-        
+        // Acha a linha anterior á linha que queremos
         while(auxLinha->abaixo != m_headLinha && auxLinha->abaixo->linha < i) {
             auxLinha = auxLinha->abaixo;
         }
-        
-        while(auxColuna->direita != m_headColuna && auxColuna->direita->coluna < j) {
-            auxColuna = auxColuna->direita;
-        }
 
         if(auxLinha->abaixo != m_headLinha && auxLinha->abaixo->linha == i) {
-            auxLinha->abaixo->value = value;
-        } else {
-            Node* nodeL = new Node(i, j, value);
-            nodeL->abaixo = auxLinha->abaixo;
-            auxLinha->abaixo = nodeC;
+            // Caso em que já existia uma linha: avanço pra ela
+            auxLinha = auxLinha->abaixo;
+        } else {// Se nao existia a linha, criamos ela
+            Node* novoL = new Node(i, 0, 0);
+            // Insere nó na lista de m_headLinhas 
+            novoL->abaixo = auxLinha->abaixo;// Aponta pro próximo abaixo
+            auxLinha->abaixo = novoL;// O anterior aponta pra ele 
+            auxLinha = novoL;// Aux representa a nova linha
+            auxLinha->direita = auxLinha;//Aponta pra ele mesmo pois ainda nao tem as colunas
         }
-        
-        if(auxColuna->direita != m_headColuna && auxColuna->direita->coluna == j) {
-            auxColuna->abaixo->value = value;
-        } else {
-            Node* nodeC = new Node(i, j, value);
-            nodeC->direita = auxColuna->direita;
-            auxColuna->direita = nodeC;
+
+        Node* auxColuna = auxLinha;// Começa na linha que encontrei
+        // Enquanto nao chegamos no ultimo elemento e indice do elemento for menor que J
+        // Encontra a coluna anterior
+        while(auxColuna->direita != auxLinha && auxColuna->direita->coluna < j) {
+            auxColuna = auxColuna->direita;
         }
-        
+        // Caso em que a coluna ja existe 
+        if(auxColuna->direita != auxLinha && auxColuna->direita->coluna == j) {
+            auxColuna->direita->value = value;
+        } else {// Caso em que crio a coluna
+            Node* novoC = new Node(i, j, value);// Novo nó com valores passados
+            novoC->direita = auxColuna->direita;// Aponta pro proximo
+            auxColuna->direita = novoC; // O anterior aponta pra ele
+        }
     }
 
-    // Acessa valores que estão na matriz reconhecendo casos em que o valor é 0
     double get(int i, int j) {
         if(i < 1 || i > linhas || j < 1 || j > colunas){
             throw out_of_range("Índices inválidos");
         }
         
         Node* linhaAtual = m_headLinha;
-        // Encontro a linha que foi passada como parâmetro
-        while(linhaAtual -> abaixo != m_headLinha && linhaAtual -> abaixo -> linha <= i){
+        // Encontro a linha anterior a que foi passada como parâmetro
+        while(linhaAtual -> abaixo != m_headLinha && linhaAtual -> abaixo -> linha < i){
+            // Chego na linha anterior a que quero
             linhaAtual = linhaAtual -> abaixo;
         }
 
+        if(linhaAtual -> abaixo == m_headLinha || linhaAtual -> abaixo -> linha != i) {
+            // Caso em que linha nao existe
+            return 0.0;
+        }
+        // Se linha existe, vou pra ela
+        linhaAtual = linhaAtual -> abaixo;
+
+        // Inicializo na linha anterior e na primeira coluna que ele aponta
         Node* aux = linhaAtual -> direita;
-        while(aux != linhaAtual && aux -> coluna <= j) {
-            if(aux -> coluna == j) {
-                return aux -> value;
-            }
+        // Encontro a coluna anterior a que foi passada como parametro
+        while (aux != linhaAtual && aux -> coluna < j) {
+            // Coluna anterior a que quero
             aux = aux -> direita;
         }
 
+        // Se coluna existe, retorno o valor do elemento nela 
+        if (aux != linhaAtual && aux -> coluna == j) {
+            return aux -> value;
+        }
+        // Se nao existe retorno 0.0
         return 0.0;
 
     }
     
     // Esse imprime a matriz pegando os valores pelo get reconhecendo casos em que existe 0
-void print() {
-    Node* linhaAtual = m_headLinha->abaixo; // Começa pela primeira linha válida
-
-    for (int i = 1; i <= linhas; i++) {
-        if (linhaAtual != m_headLinha && linhaAtual->linha == i) {
-            Node* atual = linhaAtual->direita; // Primeiro elemento da linha
-            for (int j = 1; j <= colunas; j++) {
-                if (atual != linhaAtual && atual->coluna == j) {
-                    cout << atual->value << " ";
-                    atual = atual->direita; // Avança para o próximo nó na linha
-                } else {
-                    cout << " 0 ";
-                }
+    void print() {
+        for(int i = 1; i <= linhas; i++) {
+            for(int j = 1; j <= colunas; j++) {
+                cout << get(i, j) << " ";
             }
-            linhaAtual = linhaAtual->abaixo; // Passa para a próxima linha
-        } else {
-            // Linha não tem elementos armazenados, imprime apenas zeros
-            for (int j = 1; j <= colunas; j++) {
-                cout << " 0 ";
-            }
+            cout << endl;
         }
-        cout << endl;
     }
-}
 
-    void clear() {// apaga os elementos da lista
-	    Node* linhaAtual = m_headLinha -> abaixo;
+    void clear() {
+    // Apaga os elementos das linhas
+    Node* linhaAtual = m_headLinha->abaixo;
+
+    while (linhaAtual != m_headLinha) {
+        Node* atual = linhaAtual->direita;
         
-        while (linhaAtual != m_headLinha) {
-		        Node *atual = linhaAtual -> direita;
-                
-                while(atual != linhaAtual){
-                    Node* aux = atual;
-                    atual = atual -> direita;
-                    delete aux;
-                }
-                Node* auxLinha = linhaAtual;
-                linhaAtual = linhaAtual -> abaixo;
-                delete auxLinha;
-            }
-
-            Node* colunaAtual = m_headColuna -> direita;
-            while(colunaAtual != m_headColuna){
-                Node* aux = colunaAtual;
-                colunaAtual = colunaAtual -> direita;
-                delete aux;
-            }
-            
-            delete m_headLinha;
-            delete m_headColuna;
-	    // Atualiza os ínidices para 0
-	    linhas = 0;
-        colunas = 0;
+        // Apaga todos os nós na linha
+        while (atual != linhaAtual) {
+            Node* aux = atual;
+            atual = atual->direita;
+            delete aux;
+        }
+        
+        Node* auxLinha = linhaAtual;
+        linhaAtual = linhaAtual->abaixo;
+        delete auxLinha;
     }
+
+    // Apaga os elementos das colunas
+    Node* colunaAtual = m_headColuna->direita;
+    while (colunaAtual != m_headColuna) {
+        Node* aux = colunaAtual;
+        colunaAtual = colunaAtual->direita;
+        delete aux;
+    }
+
+    // Apaga os cabeçalhos
+    delete m_headLinha;
+    delete m_headColuna;
+
+    // Atualiza os índices para 0
+    linhas = 0;
+    colunas = 0;
+
+    cout << "Matriz destruida" << endl;
+}
 
 
     // Esses métodos são opcionais
