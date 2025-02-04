@@ -10,13 +10,11 @@ void readSparseMatrix(SparseMatrix& m, const string& filename) {
     if (!arquivo) {
         cerr << "Erro ao abrir o arquivo!\n";
         return;
-    } else {
-        cout << "Arquivo lido com sucesso!" << endl;
     }
 
     int linhas, colunas;
     arquivo >> linhas >> colunas; // Lendo número de linhas e colunas
-    m = SparseMatrix(linhas, colunas); // Ajustando o tamanho da matriz esparsa
+    m.inicializar(linhas, colunas); // Ajustando o tamanho da matriz esparsa
 
     int i, j;
     double valor;
@@ -88,9 +86,12 @@ int main(){
      // readSparseMatrix(A, "teste.txt");
     
 
-    SparseMatrix A(3, 3);
+    SparseMatrix A;
+    readSparseMatrix(A, "teste.txt");
+    A.print();
+    A.clear();
     
-    // Inserir valores na matriz
+    /* // Inserir valores na matriz
     A.insert(1, 1, 10);
     A.insert(1, 2, 20);
     A.insert(1, 3, 30);
@@ -134,15 +135,15 @@ int main(){
     cout << "Valor na posicao (3, 1): " << A.get(3, 1) << endl;  // Esperado: 0.0
     */
     // Limpar a matriz e verificar se o código funciona sem vazamento de memória
-    A.clear();
+     // A.clear();
     
     // Após chamar clear, tentaremos acessar a matriz novamente para verificar
-    try {
+    /*try {
         cout << "Tentando acessar valor apos limpar a matriz: " << A.get(1, 1) << endl;
     } catch (const out_of_range& e) {
         cout << "Erro esperado: " << e.what() << endl;  // Esperado: Erro de índice inválido
     }
-
+*/
     return 0;
 }
 

@@ -20,12 +20,28 @@ public:
 // OBS: Grazi, esse comentários são apenas para nós 2
 // Não é pro Atílio, não se preocupe ;)
 
+    // Construtor default
+    SparseMatrix() {
+        linhas = 0;
+        colunas = 0;
+        m_headLinha = nullptr;
+        m_headColuna = nullptr;
+    }
+
     // Construtor que recebe como parâmetro o numero de linhas e colunas
     SparseMatrix(int m, int n) {
         if (m <= 0 || n <= 0) {
             throw invalid_argument("As medidas precisam ser positivas");
+            return;
         }
-            
+        inicializar(m, n);
+    }
+
+    void inicializar(int m, int n) {
+        if(linhas != 0 || colunas != 0) {
+            throw invalid_argument("A matriz já foi inicializada!");
+        }
+
         linhas = m;
         colunas = n;
             
@@ -50,8 +66,6 @@ public:
             auxColuna -> abaixo = auxColuna;
         }
         auxColuna->direita = m_headColuna;
-
-        cout << "Matriz criada" << endl;
     }
 
     // Destrutor
