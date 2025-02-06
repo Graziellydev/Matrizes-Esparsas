@@ -213,12 +213,20 @@ public:
 
     // Esses métodos são opcionais
     // Criei apenas caso a gente precise (consequências do Java)
-    int getLinhas() {
+    int getLinhas() const {
         return linhas;
     }
 
-    int getColunas() {
+    int getColunas() const {
         return colunas;
+    }
+
+    Node* getHeadLinha() const {
+        return m_headLinha;
+    }
+
+    Node* getHeadColuna() const {
+        return m_headColuna;
     }
 
 };

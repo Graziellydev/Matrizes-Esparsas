@@ -2,10 +2,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
 #include "SparseMatrix.h"
 using namespace std;
 
-void readSparseMatrix(SparseMatrix& m, const string& filename) {
+void readSparseMatrix(SparseMatrix*& m, const string& filename) {
     ifstream arquivo(filename);
     if (!arquivo) {
         cerr << "Erro ao abrir o arquivo!\n";
@@ -14,15 +15,73 @@ void readSparseMatrix(SparseMatrix& m, const string& filename) {
 
     int linhas, colunas;
     arquivo >> linhas >> colunas; // Lendo número de linhas e colunas
-    m.inicializar(linhas, colunas); // Ajustando o tamanho da matriz esparsa
+    m = new SparseMatrix(linhas, colunas); // Ajustando o tamanho da matriz esparsa
 
     int i, j;
     double valor;
     while (arquivo >> i >> j >> valor) { // Lendo cada tripla (linha, coluna, valor)
-        m.insert(i, j, valor); // Inserindo na estrutura de dados da matriz esparsa
+        m->insert(i, j, valor); // Inserindo na estrutura de dados da matriz esparsa
     }
 
     arquivo.close();
+}
+
+SparseMatrix* sum(SparseMatrix*& A, SparseMatrix*& B) {
+    if(A->getLinhas() != B->getLinhas() || A->getColunas() != B->getColunas()) {
+        throw invalid_argument("As medidas das matrizes precisam ser iguais!");
+    }
+    
+    SparseMatrix* C = new SparseMatrix(A->getLinhas(), A->getColunas()); // Cria a matriz da soma
+
+    Node* atualA = A->getHeadLinha()->abaixo;
+    // Esse while vai percorrendo as linhas da matriz A e vai inserindo os elementos na matriz C
+    while(atualA != A->getHeadLinha()) {
+        Node* colunaA = atualA->direita; // Cria um node para percorrer as colunas
+        // Cria um while para percorrer as colunas e inserir os elementos na matriz C
+        while(colunaA != atualA) {
+            C->insert(colunaA->linha, colunaA->coluna, colunaA->value); // Insere na matriz C
+            colunaA = colunaA->direita; // Atualiza a posição da coluna
+        }
+        atualA = atualA->abaixo; // Atualiza a posição da linha
+    }
+
+    Node* atualB = B->getHeadLinha()->abaixo;
+    // Esse while vai percorrendo as linhas da matriz B
+    while(atualB != B->getHeadLinha()) {
+        Node* colunaB = atualB->direita; // Cria um node para percorrer as colunas
+        while(colunaB != atualB) {
+            // Cria um node para percorrer a matriz C para verificar os nós existentes
+            Node* atualC = C->getHeadLinha()->abaixo;
+            bool existe = false; // Para saber se existe o nó na matriz C
+            // Começa pela linha
+            while(atualC != C->getHeadLinha()) {
+                Node* colunaC = atualC->direita; // Cria um node para percorrer as colunas da matriz C
+                // Esse while percorre as colunas da matriz C já dentro das linhas
+                while(colunaC != atualC) {
+                    // Esse if verifica se os índices da matriz B existem e são iguais aos mesmos da C (que veio da matriz A)
+                    // Se sim, ele soma os valores, confirma que existe e fecha o loop
+                    if(colunaC->linha == colunaB->linha && colunaC->coluna == colunaB->coluna) {
+                        colunaC->value += colunaB->value;
+                        existe = true;
+                        break;
+                    }
+                    colunaC = colunaC->direita; // Atualiza a posição da coluna da matriz C
+                }
+                // Se deu tudo certo ele quebra o loop da linha da matriz C
+                if(existe == true) {
+                    break;
+                }
+                atualC = atualC->abaixo; // Atualiza a posição da linha da matriz C
+            }
+            // Caso o nó não existe, ele cria e insere na posição desejada
+            if(existe == false) {
+                C->insert(colunaB->linha, colunaB->coluna, colunaB->value);
+            }
+            colunaB = colunaB->direita; // Atualiza a posição da coluna da matriz B
+        }
+        atualB = atualB->abaixo; // Atualiza a posição da linha da matriz B
+    }
+    return C;
 }
 
 void mostrarMenu() {
@@ -41,13 +100,40 @@ void mostrarMenu() {
 
 SparseMatrix ler();
 
-SparseMatrix sum(SparseMatrix& A, SparseMatrix& B);
-
 SparseMatrix multiply(SparseMatrix& A, SparseMatrix& B);
 
 int main(){
     
     cout << "Bem-vindo" << endl;
+
+    vector<SparseMatrix*> matrizes;
+
+    SparseMatrix* A = nullptr;
+    readSparseMatrix(A, "teste.txt");
+    A->print();
+    SparseMatrix* B = nullptr;
+    readSparseMatrix(B, "teste2.txt");
+    B->print();
+    cout << endl;
+    matrizes.push_back(A);
+    matrizes.push_back(B);
+
+    //SparseMatrix* C = nullptr;
+    //C = sum(A, B);
+    //C->print();
+    delete A;
+    delete B;
+    //delete C;
+
+    //for(auto& matriz : matrizes) {
+      //  delete matriz;
+    //}
+    //delete C;
+
+    //cout << matrizes[0] << endl;
+    //cout << matrizes[1] << endl;
+    //cout << matrizes[2] << endl;
+
     
      /*string comando;
      while(true) {
@@ -86,10 +172,6 @@ int main(){
      // readSparseMatrix(A, "teste.txt");
     
 
-    SparseMatrix A;
-    readSparseMatrix(A, "teste.txt");
-    A.print();
-    A.clear();
     
     /* // Inserir valores na matriz
     A.insert(1, 1, 10);
