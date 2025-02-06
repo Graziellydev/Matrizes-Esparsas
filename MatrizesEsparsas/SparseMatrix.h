@@ -38,10 +38,6 @@ public:
     }
 
     void inicializar(int m, int n) {
-        if(linhas != 0 || colunas != 0) {
-            throw invalid_argument("A matriz já foi inicializada!");
-        }
-
         linhas = m;
         colunas = n;
             

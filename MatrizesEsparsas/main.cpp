@@ -118,9 +118,14 @@ int main(){
     matrizes.push_back(A);
     matrizes.push_back(B);
 
-    //SparseMatrix* C = nullptr;
-    //C = sum(A, B);
-    //C->print();
+    matrizes[0]->print();
+    cout << endl;
+    matrizes[1]->print();
+
+    cout << endl;
+    SparseMatrix* C = nullptr;
+    C = sum(A, B);
+    C->print();
     delete A;
     delete B;
     //delete C;
