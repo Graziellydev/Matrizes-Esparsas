@@ -160,11 +160,14 @@ public:
     
     // Esse imprime a matriz pegando os valores pelo get reconhecendo casos em que existe 0
     void print() {
+        cout << "\n-----------------------------------------\n";
         for(int i = 1; i <= linhas; i++) {
+            cout << "| ";
             for(int j = 1; j <= colunas; j++) {
                 cout << get(i, j) << " ";
             }
-            cout << endl;
+            cout << " |" << endl;
+            cout << "\n-----------------------------------------\n";
         }
     }
 

@@ -84,6 +84,72 @@ SparseMatrix* sum(SparseMatrix*& A, SparseMatrix*& B) {
     return C;
 }
 
+SparseMatrix* sub(SparseMatrix*& A, SparseMatrix*& B) {
+    if(A->getLinhas() != B->getLinhas() || A->getColunas() != B->getColunas()) {
+        throw invalid_argument("As medidas das matrizes precisam ser iguais!");
+    }
+    
+    SparseMatrix* C = new SparseMatrix(A->getLinhas(), A->getColunas()); // Cria a matriz da soma
+
+    Node* atualA = A->getHeadLinha()->abaixo;
+    // Esse while vai percorrendo as linhas da matriz A e vai inserindo os elementos na matriz C
+    while(atualA != A->getHeadLinha()) {
+        Node* colunaA = atualA->direita; // Cria um node para percorrer as colunas
+        // Cria um while para percorrer as colunas e inserir os elementos na matriz C
+        while(colunaA != atualA) {
+            C->insert(colunaA->linha, colunaA->coluna, colunaA->value); // Insere na matriz C
+            colunaA = colunaA->direita; // Atualiza a posição da coluna
+        }
+        atualA = atualA->abaixo; // Atualiza a posição da linha
+    }
+
+    Node* atualB = B->getHeadLinha()->abaixo;
+    // Esse while vai percorrendo as linhas da matriz B
+    while(atualB != B->getHeadLinha()) {
+        Node* colunaB = atualB->direita; // Cria um node para percorrer as colunas
+        while(colunaB != atualB) {
+            // Cria um node para percorrer a matriz C para verificar os nós existentes
+            Node* atualC = C->getHeadLinha()->abaixo;
+            bool existe = false; // Para saber se existe o nó na matriz C
+            // Começa pela linha
+            while(atualC != C->getHeadLinha()) {
+                Node* colunaC = atualC->direita; // Cria um node para percorrer as colunas da matriz C
+                // Esse while percorre as colunas da matriz C já dentro das linhas
+                while(colunaC != atualC) {
+                    // Esse if verifica se os índices da matriz B existem e são iguais aos mesmos da C (que veio da matriz A)
+                    // Se sim, ele soma os valores, confirma que existe e fecha o loop
+                    if(colunaC->linha == colunaB->linha && colunaC->coluna == colunaB->coluna) {
+                        colunaC->value -= colunaB->value;
+                        existe = true;
+                        break;
+                    }
+                    colunaC = colunaC->direita; // Atualiza a posição da coluna da matriz C
+                }
+                // Se deu tudo certo ele quebra o loop da linha da matriz C
+                if(existe == true) {
+                    break;
+                }
+                atualC = atualC->abaixo; // Atualiza a posição da linha da matriz C
+            }
+            // Caso o nó não existe, ele cria e insere na posição desejada
+            if(existe == false) {
+                C->insert(colunaB->linha, colunaB->coluna, colunaB->value * -1);
+            }
+            colunaB = colunaB->direita; // Atualiza a posição da coluna da matriz B
+        }
+        atualB = atualB->abaixo; // Atualiza a posição da linha da matriz B
+    }
+    return C;
+}
+
+ /* SparseMatrix* multiply(SparseMatrix*& A, SparseMatrix*& B) {
+    if(A->getColunas() != B->getLinhas()) {
+        throw out_of_range("Erro: tamanhos inválidos das matrizes para realizar a multiplicação!");
+    }
+
+    SparseMatrix C* = new SparseMatrix(A->getLinhas(), B->getColunas());
+ } */
+
 void mostrarMenu() {
     cout << "------------------------ MENU DE OPCOES :) ------------------------\n"
          << "| sair -> sai do programa :( \n"
@@ -97,10 +163,6 @@ void mostrarMenu() {
          
          << "-------------------------------------------------------------------\n";
 }
-
-SparseMatrix ler();
-
-SparseMatrix multiply(SparseMatrix& A, SparseMatrix& B);
 
 int main(){
     
@@ -124,20 +186,19 @@ int main(){
 
     cout << endl;
     SparseMatrix* C = nullptr;
-    C = sum(A, B);
+    //C = sum(A, B);
+    cout << "---------------------------\n";
+    //C->print();
+    cout << "---------------------------\n";
+    C = sub(A, B);
+    cout << "---------------------------\n";
     C->print();
+
+
+    
     delete A;
     delete B;
-    //delete C;
-
-    //for(auto& matriz : matrizes) {
-      //  delete matriz;
-    //}
-    //delete C;
-
-    //cout << matrizes[0] << endl;
-    //cout << matrizes[1] << endl;
-    //cout << matrizes[2] << endl;
+    delete C;
 
     
      /*string comando;
