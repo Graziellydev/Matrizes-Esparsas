@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <stdexcept>
+#include <iomanip>
 #include "Node.h"
 
 using namespace std;
@@ -17,9 +18,6 @@ private:
 
 public:
 
-// OBS: Grazi, esse comentários são apenas para nós 2
-// Não é pro Atílio, não se preocupe ;)
-
     // Construtor default
     SparseMatrix() {
         linhas = 0;
@@ -28,7 +26,9 @@ public:
         m_headColuna = nullptr;
     }
 
-    // Construtor que recebe como parâmetro o numero de linhas e colunas
+    /* Construtor que recebe como parâmetro o numero de linhas e colunas.
+    Ele chama o método inicializar que cria a matriz esparsa vazia! */
+
     SparseMatrix(int m, int n) {
         if (m <= 0 || n <= 0) {
             throw invalid_argument("As medidas precisam ser positivas");
@@ -36,6 +36,11 @@ public:
         }
         inicializar(m, n);
     }
+
+    /* Esse método basicamente faz a obrigação do construtor.
+    Primeiramente, ele inicializa as linhas e colunas com o tamanho da matriz,
+    além disso, ele também (continuo depois)...
+    */ 
 
     void inicializar(int m, int n) {
         linhas = m;
@@ -64,23 +69,24 @@ public:
         auxColuna->direita = m_headColuna;
     }
 
-    // Destrutor
+    // Destrutor: chama a função clear para liberar a memória corretamente
+
     ~SparseMatrix() {
-        clear();  // Chama a função clear para liberar a memória corretamente
-        cout << "Matriz esparsa destruída" << endl;
+        clear();
 }
 
 
-    /* Primeiro ele faz a verificação se os índices são válidos, se forem o código continua.
-    Depois disso ele verifica se o value é 0, se não for, o código continua.
-    Depois, ele cria dois nós auxiliares para a linha e coluna, começando pelo nó sentinela.
-    Depois, ele possui dois loops que percorrem a lista de linhas e colunas para chegar na posição desejada.
-    Depois, ele faz uma verificação para saber se o elemento no índice (i,j) já existe.
-    Caso exista, ele só atualiza o valor.
-    Caso não exista, ele cria um novo nó e insere nas estruturas de linhas e colunas
-    */
+    /* Primeiro, ele verifica se os índices são válidos. Caso sejam inválidos,
+    uma exceção é lançada. Além disso, se o valor inserido for 0, o método acaba na mesma hora
+    Em seguida, um nó auxiliar é criado para percorrer as linhas da matriz,
+    indo até o índice da linha desejada. Caso o nó na linha já exista,
+    o nó auxiliar avança para ela. Caso não exista, um novo nó é criado e inserido na linha desejada.
+    Após isso, um nó auxiliar é criado para percorrer as colunas da matriz,
+    até chegar no índice desejado da coluna. Caso o nó já exista, o valor é atualizado,
+    caso contrário, o nó para a coluna é criado e inserido na matriz! */
+
     void insert(int i, int j, double value) {
-        if (i > linhas || i < 1 || j > colunas || j < 1) {
+        if (i < 1 || i > linhas || j < 1 || j > colunas) {
             throw out_of_range("Índices inválidos");
         }
 
@@ -157,9 +163,38 @@ public:
         return 0.0;
 
     }
+
+    void print() {
+        for (int i = 0; i < linhas; i++) {
+            cout << "+";
+            for (int j = 0; j < colunas; j++) {
+                cout << "----+";
+            }
+            cout << "\n|";
+            
+            Node *atual = m_headLinha->abaixo;
+            for (int j = 0; j < colunas; j++) {
+                if (atual && atual->coluna == j) {
+                    cout << setw(3) << (int)atual->value << " |";
+                    atual = atual->direita;
+                } else {
+                    cout << "  0 |";
+                }
+            }
+            cout << "\n";
+        }
+        
+        cout << "+";
+        for (int j = 0; j < colunas; j++) {
+            cout << "----+";
+        }
+        cout << "\n";
+    }
+    
+
     
     // Esse imprime a matriz pegando os valores pelo get reconhecendo casos em que existe 0
-    void print() {
+    /*void print() {
         cout << "\n-----------------------------------------\n";
         for(int i = 1; i <= linhas; i++) {
             cout << "| ";
@@ -167,9 +202,9 @@ public:
                 cout << get(i, j) << " ";
             }
             cout << " |" << endl;
-            cout << "\n-----------------------------------------\n";
         }
-    }
+        cout << "\n-----------------------------------------\n";
+    }*/
 
     void clear() {
     // Apaga os elementos das linhas
@@ -210,8 +245,8 @@ public:
 }
 
 
-    // Esses métodos são opcionais
-    // Criei apenas caso a gente precise (consequências do Java)
+    // Esses métodos são importantes para conseguirmos acessar os atributos privados da classe!
+
     int getLinhas() const {
         return linhas;
     }
@@ -227,6 +262,7 @@ public:
     Node* getHeadColuna() const {
         return m_headColuna;
     }
+
 
 };
 

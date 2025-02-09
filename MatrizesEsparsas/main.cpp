@@ -14,13 +14,13 @@ void readSparseMatrix(SparseMatrix*& m, const string& filename) {
     }
 
     int linhas, colunas;
-    arquivo >> linhas >> colunas; // Lendo número de linhas e colunas
-    m = new SparseMatrix(linhas, colunas); // Ajustando o tamanho da matriz esparsa
+    arquivo >> linhas >> colunas;
+    m = new SparseMatrix(linhas, colunas);
 
     int i, j;
     double valor;
-    while (arquivo >> i >> j >> valor) { // Lendo cada tripla (linha, coluna, valor)
-        m->insert(i, j, valor); // Inserindo na estrutura de dados da matriz esparsa
+    while (arquivo >> i >> j >> valor) {
+        m->insert(i, j, valor);
     }
 
     arquivo.close();
@@ -31,56 +31,22 @@ SparseMatrix* sum(SparseMatrix*& A, SparseMatrix*& B) {
         throw invalid_argument("As medidas das matrizes precisam ser iguais!");
     }
     
-    SparseMatrix* C = new SparseMatrix(A->getLinhas(), A->getColunas()); // Cria a matriz da soma
+    SparseMatrix* C = new SparseMatrix(A->getLinhas(), A->getColunas());
 
-    Node* atualA = A->getHeadLinha()->abaixo;
-    // Esse while vai percorrendo as linhas da matriz A e vai inserindo os elementos na matriz C
-    while(atualA != A->getHeadLinha()) {
-        Node* colunaA = atualA->direita; // Cria um node para percorrer as colunas
-        // Cria um while para percorrer as colunas e inserir os elementos na matriz C
-        while(colunaA != atualA) {
-            C->insert(colunaA->linha, colunaA->coluna, colunaA->value); // Insere na matriz C
-            colunaA = colunaA->direita; // Atualiza a posição da coluna
+    int i = 1;
+    while(i <= A->getLinhas()) {
+        int j = 1;
+        double soma = 0;
+        while(j <= A->getColunas()) {
+            soma = A->get(i, j) + B->get(i, j);
+            if(soma != 0) {
+                C->insert(i, j, soma);  
+            }
+            j++;
         }
-        atualA = atualA->abaixo; // Atualiza a posição da linha
+        i++;
     }
 
-    Node* atualB = B->getHeadLinha()->abaixo;
-    // Esse while vai percorrendo as linhas da matriz B
-    while(atualB != B->getHeadLinha()) {
-        Node* colunaB = atualB->direita; // Cria um node para percorrer as colunas
-        while(colunaB != atualB) {
-            // Cria um node para percorrer a matriz C para verificar os nós existentes
-            Node* atualC = C->getHeadLinha()->abaixo;
-            bool existe = false; // Para saber se existe o nó na matriz C
-            // Começa pela linha
-            while(atualC != C->getHeadLinha()) {
-                Node* colunaC = atualC->direita; // Cria um node para percorrer as colunas da matriz C
-                // Esse while percorre as colunas da matriz C já dentro das linhas
-                while(colunaC != atualC) {
-                    // Esse if verifica se os índices da matriz B existem e são iguais aos mesmos da C (que veio da matriz A)
-                    // Se sim, ele soma os valores, confirma que existe e fecha o loop
-                    if(colunaC->linha == colunaB->linha && colunaC->coluna == colunaB->coluna) {
-                        colunaC->value += colunaB->value;
-                        existe = true;
-                        break;
-                    }
-                    colunaC = colunaC->direita; // Atualiza a posição da coluna da matriz C
-                }
-                // Se deu tudo certo ele quebra o loop da linha da matriz C
-                if(existe == true) {
-                    break;
-                }
-                atualC = atualC->abaixo; // Atualiza a posição da linha da matriz C
-            }
-            // Caso o nó não existe, ele cria e insere na posição desejada
-            if(existe == false) {
-                C->insert(colunaB->linha, colunaB->coluna, colunaB->value);
-            }
-            colunaB = colunaB->direita; // Atualiza a posição da coluna da matriz B
-        }
-        atualB = atualB->abaixo; // Atualiza a posição da linha da matriz B
-    }
     return C;
 }
 
@@ -89,66 +55,50 @@ SparseMatrix* sub(SparseMatrix*& A, SparseMatrix*& B) {
         throw invalid_argument("As medidas das matrizes precisam ser iguais!");
     }
     
-    SparseMatrix* C = new SparseMatrix(A->getLinhas(), A->getColunas()); // Cria a matriz da soma
+    SparseMatrix* C = new SparseMatrix(A->getLinhas(), A->getColunas());
 
-    Node* atualA = A->getHeadLinha()->abaixo;
-    // Esse while vai percorrendo as linhas da matriz A e vai inserindo os elementos na matriz C
-    while(atualA != A->getHeadLinha()) {
-        Node* colunaA = atualA->direita; // Cria um node para percorrer as colunas
-        // Cria um while para percorrer as colunas e inserir os elementos na matriz C
-        while(colunaA != atualA) {
-            C->insert(colunaA->linha, colunaA->coluna, colunaA->value); // Insere na matriz C
-            colunaA = colunaA->direita; // Atualiza a posição da coluna
+    int i = 1;
+    while(i <= A->getLinhas()) {
+        int j = 1;
+        double subtracao = 0;
+        while(j <= A->getColunas()) {
+            subtracao = A->get(i, j) - B->get(i, j);
+            C->insert(i, j, subtracao);  
+            j++;
         }
-        atualA = atualA->abaixo; // Atualiza a posição da linha
+        i++;
     }
 
-    Node* atualB = B->getHeadLinha()->abaixo;
-    // Esse while vai percorrendo as linhas da matriz B
-    while(atualB != B->getHeadLinha()) {
-        Node* colunaB = atualB->direita; // Cria um node para percorrer as colunas
-        while(colunaB != atualB) {
-            // Cria um node para percorrer a matriz C para verificar os nós existentes
-            Node* atualC = C->getHeadLinha()->abaixo;
-            bool existe = false; // Para saber se existe o nó na matriz C
-            // Começa pela linha
-            while(atualC != C->getHeadLinha()) {
-                Node* colunaC = atualC->direita; // Cria um node para percorrer as colunas da matriz C
-                // Esse while percorre as colunas da matriz C já dentro das linhas
-                while(colunaC != atualC) {
-                    // Esse if verifica se os índices da matriz B existem e são iguais aos mesmos da C (que veio da matriz A)
-                    // Se sim, ele soma os valores, confirma que existe e fecha o loop
-                    if(colunaC->linha == colunaB->linha && colunaC->coluna == colunaB->coluna) {
-                        colunaC->value -= colunaB->value;
-                        existe = true;
-                        break;
-                    }
-                    colunaC = colunaC->direita; // Atualiza a posição da coluna da matriz C
-                }
-                // Se deu tudo certo ele quebra o loop da linha da matriz C
-                if(existe == true) {
-                    break;
-                }
-                atualC = atualC->abaixo; // Atualiza a posição da linha da matriz C
-            }
-            // Caso o nó não existe, ele cria e insere na posição desejada
-            if(existe == false) {
-                C->insert(colunaB->linha, colunaB->coluna, colunaB->value * -1);
-            }
-            colunaB = colunaB->direita; // Atualiza a posição da coluna da matriz B
-        }
-        atualB = atualB->abaixo; // Atualiza a posição da linha da matriz B
-    }
     return C;
 }
 
- /* SparseMatrix* multiply(SparseMatrix*& A, SparseMatrix*& B) {
-    if(A->getColunas() != B->getLinhas()) {
-        throw out_of_range("Erro: tamanhos inválidos das matrizes para realizar a multiplicação!");
+SparseMatrix* multiply(SparseMatrix*& A, SparseMatrix*& B) {
+    if (A->getColunas() != B->getLinhas()) {
+        throw invalid_argument("Os tamanhos das matrizes são inválidos para realizar a multiplicação!");
     }
 
-    SparseMatrix C* = new SparseMatrix(A->getLinhas(), B->getColunas());
- } */
+    SparseMatrix* C = new SparseMatrix(A->getLinhas(), B->getColunas());
+    
+    int i = 1;
+    while(i <= A->getLinhas()) {
+        int j = 1;
+        while(j <= B->getColunas()) {
+            int k = 1;
+            double multiplicacao = 0;
+            while(k <= B->getLinhas()) {
+                multiplicacao += A->get(i, k) * B->get(k, j);
+                k++;
+            }
+            if(multiplicacao != 0) {
+                C->insert(i, j, multiplicacao);
+            }
+            j++;
+        }
+        i++;
+    }
+
+    return C;
+}
 
 void mostrarMenu() {
     cout << "------------------------ MENU DE OPCOES :) ------------------------\n"
@@ -164,9 +114,9 @@ void mostrarMenu() {
          << "-------------------------------------------------------------------\n";
 }
 
-int main(){
+/*int main(){
     
-    cout << "Bem-vindo" << endl;
+   /* cout << "Bem-vindo!" << endl;
 
     vector<SparseMatrix*> matrizes;
 
@@ -187,11 +137,8 @@ int main(){
     cout << endl;
     SparseMatrix* C = nullptr;
     //C = sum(A, B);
-    cout << "---------------------------\n";
     //C->print();
-    cout << "---------------------------\n";
     C = sub(A, B);
-    cout << "---------------------------\n";
     C->print();
 
 
@@ -199,99 +146,48 @@ int main(){
     delete A;
     delete B;
     delete C;
-
-    
-     /*string comando;
-     while(true) {
-        cout << "Digite um comando: ";
-        string entrada;
-        getline(cin, entrada);
-        istringstream iss(entrada);
-        iss >> comando;
-        if(comando == "sair") {
-            cout << "Saindo do programa..." << endl;
-            break;
-        } else if(comando == "multiply") { 
-            return 0;
-            
-        } else if(comando == "create") {
-            int linhas, colunas;
-            if(iss >> linhas >> colunas) {
-                matrizes.push_back(SparseMatrix(linhas, colunas));
-                cout >> "Matriz criada com " << linhas " linhas e " << colunas << "colunas ;)";
-            } else {
-                cout << " Entrada invalida :/ Lembre-se que voce deve passar o numero de linhas e colunas da matriz";
-            }
-            return 0;
-            
-        } else if(comando == "show") {
-            return 0;
-        
-        } else if(comando == "insert") {
-            return 0;
-
-        } else if(comando == "menu") {
-            mostrarMenu();
-        }
-    } */
-    
-     // readSparseMatrix(A, "teste.txt");
-    
-
-    
-    /* // Inserir valores na matriz
-    A.insert(1, 1, 10);
-    A.insert(1, 2, 20);
-    A.insert(1, 3, 30);
-
-    A.insert(2, 1, 40);
-    A.insert(2, 2, 50);
-    A.insert(2, 3, 60);
-    
-    A.insert(3, 1, 70);
-    A.insert(3, 2, 80);
-    A.insert(3, 3, 90);
-
-    // Testar a função get para os valores inseridos
-    cout << "Valor na posicao (1, 1): " << A.get(1, 1) << endl;
-    cout << "Valor na posicao (1, 2): " << A.get(1, 2) << endl;
-    cout << "Valor na posicao (1, 3): " << A.get(1, 3) << endl;
-    
-    cout << "Valor na posicao (2, 1): " << A.get(2, 1) << endl;
-    cout << "Valor na posicao (2, 2): " << A.get(2, 2) << endl;
-    cout << "Valor na posicao (2, 3): " << A.get(2, 3) << endl;
-
-    
-    cout << "Valor na posicao (3, 1): " << A.get(3, 1) << endl;
-    cout << "Valor na posicao (3, 2): " << A.get(3, 2) << endl;
-    cout << "Valor na posicao (3, 3): " << A.get(3, 3) << endl;
-    
-    cout << "----------------------------------------------------" << endl;
-    A.insert(1, 1, 11);
-    A.insert(2, 2, 25);
-    A.insert(3, 3, 35);
-    A.insert(2, 1, 15);
-
-    cout << "Valor na posicao (1, 1): " << A.get(1, 1) << endl;  // Esperado: 10.5
-    cout << "Valor na posicao (2, 2): " << A.get(2, 2) << endl;  // Esperado: 20.5
-    cout << "Valor na posicao (3, 3): " << A.get(3, 3) << endl;  // Esperado: 20.0
-    cout << "Valor na posicao (2, 1): " << A.get(2, 1) << endl;  // Esperado: 15.0
-    
-    /* Testar a função get para posições não preenchidas
-    cout << "Valor na posicao (1, 2): " << A.get(1, 2) << endl;  // Esperado: 0.0
-    cout << "Valor na posicao (2, 3): " << A.get(2, 3) << endl;  // Esperado: 0.0
-    cout << "Valor na posicao (3, 1): " << A.get(3, 1) << endl;  // Esperado: 0.0
-    */
-    // Limpar a matriz e verificar se o código funciona sem vazamento de memória
-     // A.clear();
-    
-    // Após chamar clear, tentaremos acessar a matriz novamente para verificar
-    /*try {
-        cout << "Tentando acessar valor apos limpar a matriz: " << A.get(1, 1) << endl;
-    } catch (const out_of_range& e) {
-        cout << "Erro esperado: " << e.what() << endl;  // Esperado: Erro de índice inválido
-    }
 */
+    
+int main() {
+    int linhas, colunas;
+    cout << "Digite o número de linhas e colunas da matriz: ";
+    cin >> linhas >> colunas;
+    SparseMatrix matriz(linhas, colunas);
+    
+    string comando;
+    do {
+        mostrarMenu();
+        cin >> comando;
+        // São ponteiros! Se criarmos sem ponteiros teremos que fazer um construtor de cópia e um operador!!!
+        //suspeitei
+        // Pq tu alterou o print? Não tava correto?
+        if (comando == "create") {
+            cin >> linhas >> colunas;
+            matriz = SparseMatrix(linhas, colunas);
+        } else if (comando == "sum") {
+            SparseMatrix matrizB(linhas, colunas);
+            SparseMatrix resultado = sum(matriz, matrizB);
+            resultado.print();
+        } else if (comando == "multiply") {
+            SparseMatrix matrizB(linhas, colunas);
+            SparseMatrix resultado = multiply(matriz, matrizB);
+            resultado.print();
+        } else if (comando == "sub") {
+            SparseMatrix matrizB(linhas, colunas);
+            // Implementação da subtração aqui
+        } else if (comando == "show") {
+            matriz.print();
+        } else if (comando == "vec") {
+            cout << "Mostrando descricao do vetor de matrizes...\n";
+        } else if (comando == "randomMatriz") {
+            cout << "Criando matriz com valores aleatórios...\n";
+            // Implementação da geração aleatória aqui
+        } else if (comando != "sair") {
+            cout << "Comando inválido!\n";
+        }
+        
+    } while (comando != "sair");
+    
+    cout << "Saindo..." << endl;
     return 0;
 }
-
